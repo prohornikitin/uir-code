@@ -682,6 +682,7 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
         final rFileTaskName = genRFileTaskName(variant.name)
         final dataBindingGenBaseTaskName = genDataBindingGenBaseTaskName(variant.name)
 
+
         final JavaCompile javaCompile = project.tasks.findByName(javaTaskName)
         if (javaCompile) {
             // 获取前面已经注册的`scalaCompileTask`。见`project.tasks.register()`文档。
@@ -763,7 +764,7 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
                     }
                     // 把生成的`BuildConfig`加入依赖。同理，还可以加入别的。
                     try {
-                        project.tasks.named(buildConfigTaskName) { Task buildConfig -> // ...
+                        project.tasks.named(buildConfigTaskName) { Task buildConfig ->
                             scalaCompile.source(buildConfig)
                             evictCompileOutputForSrcTask(scalaDeduplicate, project, scalaCompile, buildConfig, scalroid, "src/${main}/java/", "src/${main}/kotlin/", "src/${sourceSet.name}/java/", "src/${sourceSet.name}/kotlin/")
                         }
