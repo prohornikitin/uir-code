@@ -125,23 +125,14 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
 
     private void testPrintParameters(Project project) {
         LOG.warn "applying plugin `$ID_PLUGIN` for ${project}"
-        // project.path: :app, project.name: app, project.group: DemoMaterial3, project.version: unspecified
-        //LOG.info "$NAME_PLUGIN ---> project.path: ${project.path}, project.name: ${project.name}, project.group: ${project.group}, project.version: ${project.version}"
-        //LOG.info ''
     }
     private final ObjectFactory factory
     private final TaskDependencyFactory dependencyFactory
-    //private final SoftwareComponentFactory softCptFactory
-    //private final JvmPluginServices jvmServices
-    //private final Factory<PatternSet> patternSetFactory
 
     @Inject
     ScalaAndroidCompatPlugin(ObjectFactory objectFactory, TaskDependencyFactory dependencyFactory) {
         this.factory = objectFactory
         this.dependencyFactory = dependencyFactory
-        //this.softCptFactory = softCptFactory
-        //this.jvmServices = jvmServices
-        //this.patternSetFactory = patternSetFactory
     }
 
     @Override
@@ -743,7 +734,6 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
                     final rFile = project.tasks.findByName(rFileTaskName)
                     final dataBinding = project.tasks.findByName(dataBindingGenBaseTaskName)
                     if (processRes) {
-                        LOG.debug "BUL ${processRes.outputs.files.find(it -> true)}"
                         final files = project.files(
                             processRes.outputs.files.find {
                                 it.path.endsWith("${variant.name}/R.jar")
@@ -763,13 +753,18 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
                         scalaCompile.classpath += project.files(rFile.outputs.files.find { it.path.endsWith("${variant.name}/R.jar") })
                     }
                     // 把生成的`BuildConfig`加入依赖。同理，还可以加入别的。
+                    LOG.debug "BUL ${dataBinding}"
+
                     try {
                         project.tasks.named(buildConfigTaskName) { Task buildConfig ->
                             scalaCompile.source(buildConfig)
                             evictCompileOutputForSrcTask(scalaDeduplicate, project, scalaCompile, buildConfig, scalroid, "src/${main}/java/", "src/${main}/kotlin/", "src/${sourceSet.name}/java/", "src/${sourceSet.name}/kotlin/")
                         }
+
                         if (dataBinding) {
-                            scalaCompile.source(dataBinding.outputs.files.filter { it.path.contains("/generated/") && it.path.contains("/${variant.name}/") })
+                            LOG.debug "BUL ${scalaCompile.source(dataBinding.outputs.files.filter { it.path.contains("/generated/") && it.path.contains("/${variant.name}/") }).getSource().toString()}"
+//                            a = null
+//                            a.toString()
                             evictCompileOutputForSrcTask(scalaDeduplicate, project, scalaCompile, dataBinding, null /*置为 null，避免重复计算。*/)
                         }
                     } catch (UnknownTaskException e) {
@@ -962,6 +957,7 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
             scalaTask.configure { scala -> // ...
                 scala.classpath += variant.getCompileClasspath(classpathKey)
             }
+            project.tasks.findByName(genJavaCompileTaskName(variant.name))
             // 抑制警告：- Gradle detected a problem with the following location: '/Users/weichou/git/bdo.cash/demo-material-3/app/build/tmp/scala-classes/githubDebug'.
             // Reason: Task ':app:mergeGithubDebugJavaResource' uses this output of task ':app:compileGithubDebugScala' without declaring an explicit or implicit dependency. This can lead to incorrect results being produced, depending on what order the tasks are executed. Please refer to https://docs.gradle.org/7.4/userguide/validation_problems.html#implicit_dependency for more details about this problem.
             final mergeJavaRes = project.tasks.findByName(genMergeJavaResourceTaskName(variant.name))
@@ -1023,7 +1019,7 @@ class ScalaAndroidCompatPlugin implements Plugin<Project> {
     }
 
     private String genProcessResourcesTaskName(String srcSetNameMatchVariant) {
-        return "process${srcSetNameMatchVariant.capitalize()}Resources"
+        return "process${srcSetNameMatchVariant.capitalize()}JavaRes"
     }
 
     private String genRFileTaskName(String srcSetNameMatchVariant) {

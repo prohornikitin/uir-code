@@ -8,11 +8,13 @@ plugins {
 android {
     scalroid {
         scala.zincVersion = "1.9.6"
+        scalaCodeReferToKt = true
+        ktCodeReferToScala = false
 //        scalaCodeReferToKt = false // Take looks below
 //        ktCodeReferToScala = true
         // Whether to expand `R.jar`, so as to fix the problem of `R.id.xxx` marked red in Scala code.
         // This will bring the `R.jar` under `External Libraries`.
-//        setAppRJarAsLib = true
+        setAppRJarAsLib = true
 //        javaDirsExcludes = ['src/main/kotlin', 'src/aaa/xxx']
     }
     namespace = "com.example.scala"
@@ -71,6 +73,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
